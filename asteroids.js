@@ -2,17 +2,20 @@ Function.prototype.inherits = function(Parent){
   function Surrogate(){}
   Surrogate.prototype = Parent.prototype;
   this.prototype = new Surrogate();
-}
+};
+
+// (function(){console.log("Hello");})();
 
 (function(){
   // TODO
   // must define dimensions on Game
   // must actually get a canvas context for Game
 
-  function Game(context) {
+  function Game(context, xDim, yDim) {
     var that = this;
     this.context = context;
     this.asteroids = [];
+    this.dimensions = {x: xDim, y: yDim};
 
     for( var i = 0; i < 10; i++) {
       this.asteroids.push(Asteroid.randomAsteroid());
@@ -26,12 +29,13 @@ Function.prototype.inherits = function(Parent){
 
     this.update = function() {
       this.asteroids.forEach(function(asteroid) {
-        asteroid.update();
+        asteroid.update({x: 1, y: 1});
       });
     };
 
     this.start = function() {
       window.setInterval(function() {
+        that.context.clearRect(0, 0, width, height)
         that.update();
         that.draw();
       }, 30);
@@ -78,3 +82,13 @@ Function.prototype.inherits = function(Parent){
 
 
 })();
+
+
+
+window.onload = function(){
+  var canvas = document.getElementById('canvas');
+  var context = canvas.getContext('2d');
+  var my_game = window.Game(context);
+  console.log("hello");
+  Game.start();
+};
