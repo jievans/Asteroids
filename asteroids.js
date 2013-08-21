@@ -43,10 +43,17 @@ Function.prototype.inherits = function(Parent){
           delete that.asteroids[index];
           that.asteroids[index] = Asteroid.randomAsteroid(that);
         }
-        if(that.ship.isHit()){
-          that.surviving = false;
-        }
       });
+
+      if(that.ship.isHit()){
+        that.surviving = false;
+      }
+
+      this.ship.update();
+
+      if(this.ship.offscreen){
+        this.ship.replacePosition();
+      }
     };
 
     this.start = function() {
@@ -105,9 +112,17 @@ Function.prototype.inherits = function(Parent){
   Asteroid.inherits(MovingObject);
 
   function Ship(game){
+    var that = this;
     this.game = game;
     this.radius = 5;
     this.position = {x: game.dimensions.x / 2, y: game.dimensions.y / 2};
+    this.velocity = { x: 0, y: 0 };
+
+    key('up', function() { that.power(0, -1); } );
+    key('down', function() { that.power(0, 1); } );
+    key('left', function() { that.power(-1, 0); } );
+    key('right', function() { that.power(1, 0); } );
+
   }
 
   Ship.inherits(MovingObject);
@@ -117,6 +132,16 @@ Function.prototype.inherits = function(Parent){
     context.fillStyle = "blue";
     var size = this.radius * 2;
     context.fillRect(this.position.x, this.position.y, size, size);
+  };
+
+  Ship.prototype.update = function() {
+    this.position = { x: this.position.x + this.velocity.x,
+                      y: this.position.y + this.velocity.y};
+  };
+
+  Ship.prototype.power = function(dx, dy) {
+    this.velocity.x += dx;
+    this.velocity.y += dy;
   };
 
   Ship.prototype.isHit = function(){
@@ -134,6 +159,22 @@ Function.prototype.inherits = function(Parent){
     });
     return hit;
   };
+
+  Ship.prototype.replacePosition = function(){
+    if(this.position.x <= 0){
+      this.position.x = this.game.dimensions.x;
+    } else if(this.position.x >= this.game.dimensions.x){
+      this.position.x = 0;
+    }
+
+    if(this.position.y <= 0){
+      this.position.y = this.game.dimensions.y;
+    } else if(this.position.y >= this.game.dimensions.y){
+      this.position.y = 0;
+    }
+  };
+
+
 
 
 
