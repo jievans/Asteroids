@@ -16,6 +16,8 @@ Function.prototype.inherits = function(Parent){
     this.context = context;
     this.asteroids = [];
     this.dimensions = {x: xDim, y: yDim};
+    this.ship = new Ship(this);
+    this.surviving = true;
 
     for( var i = 0; i < 10; i++) {
       this.asteroids.push(Asteroid.randomAsteroid(this));
@@ -31,24 +33,32 @@ Function.prototype.inherits = function(Parent){
       this.asteroids.forEach(function(asteroid) {
         asteroid.draw();
       });
+      this.ship.draw();
     };
 
     this.update = function() {
       this.asteroids.forEach(function(asteroid, index) {
         asteroid.update({x: 1, y: 1});
         if (asteroid.offscreen()) {
-          console.log("asteroids are being deleted!!!");
           delete that.asteroids[index];
           that.asteroids[index] = Asteroid.randomAsteroid(that);
+        }
+        if(that.ship.isHit()){
+          that.surviving = false;
         }
       });
     };
 
     this.start = function() {
-      window.setInterval(function() {
-        that.context.clearRect(0, 0, xDim, yDim);
-        that.update();
-        that.draw();
+      var id = window.setInterval(function() {
+        if (that.surviving === true){
+          that.context.clearRect(0, 0, xDim, yDim);
+          that.update();
+          that.draw();
+        } else {
+          console.log("You just got powned.");
+          clearInterval(id);
+        }
       }, 30);
     };
 
@@ -68,8 +78,7 @@ Function.prototype.inherits = function(Parent){
   };
 
   MovingObject.prototype.offscreen = function(){
-    var dimensions = this.game.dimensions
-    console.log(this.position.x, this.position.y);
+    var dimensions = this.game.dimensions;
     return (this.position.x <= 0 || this.position.x >= dimensions.x ||
             this.position.y <= 0 || this.position.y >= dimensions.y)
   };
@@ -77,11 +86,13 @@ Function.prototype.inherits = function(Parent){
   function Asteroid(game, position){
     MovingObject.call(this, position);
     this.game = game;
+    this.radius = 7;
 
     this.draw = function() {
-      var context = game.context;
+      var context = this.game.context;
       context.fillStyle = "red";
-      context.fillRect(this.position.x, this.position.y, 5, 5);
+      var size = this.radius * 2;
+      context.fillRect(this.position.x, this.position.y, size, size);
     };
   }
 
@@ -92,6 +103,38 @@ Function.prototype.inherits = function(Parent){
   };
 
   Asteroid.inherits(MovingObject);
+
+  function Ship(game){
+    this.game = game;
+    this.radius = 5;
+    this.position = {x: game.dimensions.x / 2, y: game.dimensions.y / 2};
+  }
+
+  Ship.inherits(MovingObject);
+
+  Ship.prototype.draw = function() {
+    var context = this.game.context;
+    context.fillStyle = "blue";
+    var size = this.radius * 2;
+    context.fillRect(this.position.x, this.position.y, size, size);
+  };
+
+  Ship.prototype.isHit = function(){
+    var that = this;
+    var hit = false;
+    this.game.asteroids.forEach(function(asteroid){
+      var distance = Math.sqrt(
+        Math.pow(asteroid.position.x - that.position.x, 2)
+      + Math.pow(asteroid.position.y - that.position.y, 2)
+      );
+      var sumRadii = asteroid.radius + that.radius;
+      if( distance < sumRadii){
+        hit = true;
+      }
+    });
+    return hit;
+  };
+
 
 
 })();
