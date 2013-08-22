@@ -15,6 +15,7 @@ Function.prototype.inherits = function(Parent){
     var that = this;
     this.context = context;
     this.asteroids = [];
+    this.bullets = [];
     this.dimensions = {x: xDim, y: yDim};
     this.ship = new Ship(this);
     this.surviving = true;
@@ -34,16 +35,37 @@ Function.prototype.inherits = function(Parent){
         asteroid.draw();
       });
       this.ship.draw();
+      this.bullets.forEach(function(bullet) {
+        bullet.draw();
+      });
     };
 
     this.update = function() {
       this.asteroids.forEach(function(asteroid, index) {
-        asteroid.update({x: 1, y: 1});
+        asteroid.update();
         if (asteroid.offscreen()) {
           delete that.asteroids[index];
           that.asteroids[index] = Asteroid.randomAsteroid(that);
         }
       });
+
+      this.bullets.forEach(function(bullet, index) {
+        bullet.update();
+        if (bullet.offscreen()) {
+          delete that.bullets[index];
+        } else {
+          that.asteroids.forEach(function(asteroid, astIndex) {
+            if (bullet.isHit(asteroid)) {
+                 delete that.asteroids[astIndex];
+                 that.asteroids[astIndex] = Asteroid.randomAsteroid(that);
+                 delete that.bullets[index];
+               }
+          });
+        }
+
+      });
+
+      this.bullets = this.bullets.filter(Boolean);
 
       if(that.ship.isHit()){
         that.surviving = false;
@@ -79,9 +101,9 @@ Function.prototype.inherits = function(Parent){
     this.position = position;
   }
 
-  MovingObject.prototype.update = function(velocity) {
-    this.position = { x: this.position.x + velocity.x,
-                      y: this.position.y + velocity.y};
+  MovingObject.prototype.update = function() {
+    this.position = { x: this.position.x + this.velocity.x,
+                      y: this.position.y + this.velocity.y};
   };
 
   MovingObject.prototype.offscreen = function(){
@@ -94,6 +116,7 @@ Function.prototype.inherits = function(Parent){
     MovingObject.call(this, position);
     this.game = game;
     this.radius = 7;
+    this.velocity = {x: 1, y: 1};
 
     this.draw = function() {
       var context = this.game.context;
@@ -122,6 +145,7 @@ Function.prototype.inherits = function(Parent){
     key('down', function() { that.power(0, 1); } );
     key('left', function() { that.power(-1, 0); } );
     key('right', function() { that.power(1, 0); } );
+    key('space', function() { that.fireBullet(); } );
 
   }
 
@@ -134,10 +158,10 @@ Function.prototype.inherits = function(Parent){
     context.fillRect(this.position.x, this.position.y, size, size);
   };
 
-  Ship.prototype.update = function() {
-    this.position = { x: this.position.x + this.velocity.x,
-                      y: this.position.y + this.velocity.y};
-  };
+  // Ship.prototype.update = function() {
+//     this.position = { x: this.position.x + this.velocity.x,
+//                       y: this.position.y + this.velocity.y};
+//   };
 
   Ship.prototype.power = function(dx, dy) {
     this.velocity.x += dx;
@@ -172,6 +196,58 @@ Function.prototype.inherits = function(Parent){
     } else if(this.position.y >= this.game.dimensions.y){
       this.position.y = 0;
     }
+  };
+
+  Ship.prototype.fireBullet = function(){
+    var currentDirection = {}
+    var speed = Math.sqrt(Math.pow(this.velocity.x, 2)
+                          + Math.pow(this.velocity.y, 2));
+
+    currentDirection.x = this.velocity.x / speed
+    currentDirection.y = this.velocity.y / speed
+
+    new Bullet(this.game, this.position, currentDirection)
+  };
+
+  function Bullet(game, position, direction){
+    MovingObject.call(this, position)
+    this.game = game;
+    this.game.bullets.push(this);
+    this.direction = direction;
+    this.speed = 10;
+    this.velocity = { x: this.direction.x * this.speed,
+                      y: this.direction.y * this.speed };
+
+    this.position;
+    this.radius = 3;
+  }
+  Bullet.inherits(MovingObject);
+
+  Bullet.prototype.draw = function() {
+    var context = this.game.context;
+    context.fillStyle = "purple";
+    var size = this.radius * 2;
+    context.fillRect(this.position.x, this.position.y, size, size);
+  };
+
+  Bullet.prototype.isHit = function(asteroid) {
+    var that = this;
+    var hit = false;
+
+    var distance = Math.sqrt(
+      Math.pow(asteroid.position.x - that.position.x, 2)
+    + Math.pow(asteroid.position.y - that.position.y, 2)
+    );
+    var sumRadii = asteroid.radius + that.radius;
+    if( distance < sumRadii){
+      hit = true;
+    }
+    return hit;
+  };
+
+  Bullet.prototype.update = function() {
+    this.position = { x: this.position.x + this.velocity.x,
+                      y: this.position.y + this.velocity.y};
   };
 
 
