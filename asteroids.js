@@ -43,6 +43,9 @@ Function.prototype.inherits = function(Parent){
     this.update = function() {
       this.asteroids.forEach(function(asteroid, index) {
         asteroid.update();
+        asteroid.changeVelocity();
+        //console.log(asteroid.scrambleVelocity);
+        // asteroid.scrambleVelocity();
         if (asteroid.offscreen()) {
           delete that.asteroids[index];
           that.asteroids[index] = Asteroid.randomAsteroid(that);
@@ -117,12 +120,31 @@ Function.prototype.inherits = function(Parent){
     this.game = game;
     this.radius = 7;
     this.velocity = {x: 1, y: 1};
+    this.velCounter = 0;
 
     this.draw = function() {
       var context = this.game.context;
       context.fillStyle = "red";
       var size = this.radius * 2;
       context.fillRect(this.position.x, this.position.y, size, size);
+    };
+
+    this.scrambleVelocity = function(){
+      var xDir = Math.random() < .5 ? 1 : -1;
+      var yDir = Math.random() < .5 ? 1 : -1;
+      this.velocity.x = Math.random() * 2 * xDir;
+      this.velocity.y = Math.random() * 2 * yDir;
+    };
+
+    this.changeVelocity = function(){
+      if(this.velCounter === 50){
+        this.scrambleVelocity();
+
+        this.velCounter = 0;
+      } else{
+        console.log(this.velCounter);
+        this.velCounter++;
+      }
     };
   }
 
@@ -131,6 +153,13 @@ Function.prototype.inherits = function(Parent){
                 y: Math.random() * game.dimensions.y};
     return new Asteroid(game, position);
   };
+
+  // Asteroid.prototype.scrambleVelocity = function(){
+//     var xDir = Math.random() < .5 ? 1 : -1;
+//     var yDir = Math.random() < .5 ? 1 : -1;
+//     this.velocity.x = Math.random() * 2 * xDir;
+//     this.velocity.y = Math.random() * 2 * yDir;
+//   };
 
   Asteroid.inherits(MovingObject);
 
@@ -164,8 +193,8 @@ Function.prototype.inherits = function(Parent){
 //   };
 
   Ship.prototype.power = function(dx, dy) {
-    this.velocity.x += dx;
-    this.velocity.y += dy;
+    this.velocity.x += dx * .5;
+    this.velocity.y += dy * .5;
   };
 
   Ship.prototype.isHit = function(){
@@ -182,6 +211,13 @@ Function.prototype.inherits = function(Parent){
       }
     });
     return hit;
+  };
+
+  Ship.prototype.update = function(){
+    this.position = { x: this.position.x + this.velocity.x,
+                      y: this.position.y + this.velocity.y};
+    this.velocity.x /= 1.02;
+    this.velocity.y /= 1.02;
   };
 
   Ship.prototype.replacePosition = function(){
