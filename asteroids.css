@@ -11,7 +11,8 @@ canvas {
   margin-left: 20px;
 }
 
-#paused {
+#paused, #game-over-message {
   display: none;
   color: red;
 }
+

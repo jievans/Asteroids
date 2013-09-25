@@ -93,6 +93,7 @@ Function.prototype.inherits = function(Parent){
           that.draw();
         } else {
           console.log("You just got powned.");
+          $("#game-over-message").show();
           clearInterval(id);
           
           var restart = function(event){
@@ -101,6 +102,7 @@ Function.prototype.inherits = function(Parent){
               console.log("event registering");
               newGame();
               $("body").unbind("keydown", restart);
+              $("#game-over-message").hide();
             }      
           };
           
