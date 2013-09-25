@@ -5,8 +5,9 @@ canvas {
 
 #game-data {
   display: inline-block;
-  font-size: 34px;
-  color: purple;
+  font-size: 20px;
+  width: 200px;
+  color: rgb(0,0,139);
   font-weight: bold;
   margin-left: 20px;
 }
@@ -15,4 +16,22 @@ canvas {
   display: none;
   color: red;
 }
+
+#score-wrapper {
+  color: purple;
+  font-size: 26px;
+}
+
+#start-message {
+  font-size: 26px;
+}
+
+#instructions {
+  text-align: center;
+  font-size: 20px;
+  color: rgb(0,0,139);
+  width: 400px;
+}
+
+
 

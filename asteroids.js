@@ -136,7 +136,7 @@ Function.prototype.inherits = function(Parent){
   function Asteroid(game, position){
     MovingObject.call(this, position);
     this.game = game;
-    this.radius = 10;
+    this.radius = 5;
     this.velocity = {x: 1, y: 1};
     this.velCounter = 0;
 
@@ -183,9 +183,9 @@ Function.prototype.inherits = function(Parent){
   function Ship(game){
     var that = this;
     this.game = game;
-    this.radius = 10;
+    this.radius = 7;
     this.position = {x: game.dimensions.x / 2, y: game.dimensions.y / 2};
-    this.velocity = { x: 0, y: 0 };
+    this.velocity = { x: 1, y: 1 };
 
     key('up', function() { that.power(0, -1); } );
     key('down', function() { that.power(0, 1); } );
@@ -320,12 +320,12 @@ Function.prototype.inherits = function(Parent){
 $(function(){
   var canvas = document.getElementById('canvas');
   var context = canvas.getContext('2d');
-  var currentGame = new Game(context, 800, 600);
+  var currentGame = new Game(context, 400, 400);
   console.log("hello");
   var intervalId = null;
   var paused = false;
   
-  $("body").on("keydown", function(event){
+  $("body").one("keydown", function(event){
     if( event.keyCode == 83 ){
       intervalId = currentGame.start();
       $("#start-message").hide();
@@ -348,7 +348,7 @@ $(function(){
   });
   
   newGame = function(){
-    currentGame = new Game(context, 800, 600);
+    currentGame = new Game(context, 400, 400);
     paused = false;
     intervalId = currentGame.start();
   };

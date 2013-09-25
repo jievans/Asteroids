@@ -7,17 +7,18 @@
 <script type="text/javascript" src="asteroids.js"></script>
 <script type="text/javascript" src="jquery.position.js"></script>
 <body>
-  <canvas width="800" height="600" id="canvas"></canvas>
+  <canvas width="400" height="400" id="canvas"></canvas>
   <div id="game-data">
     <div id="start-message">hit "s" to start the game</div>
     <div id="paused">Paused</div>
     <div id="game-over-message">
     <div id="game-over">Game Over</div>
-    <div>Hit "r" to restart.</div>
+    <div>hit "r" to restart</div>
     </div>
     <div>hit "p" to pause the game</div>
-    <div>Score: <span id="score">0</span></div>
+    <div id="score-wrapper">Score: <span id="score">0</span></div>
   </div>
+  <div id="instructions">hit the spacebar to shoot</div>
 </body>
 
 <script type="text/javascript">
