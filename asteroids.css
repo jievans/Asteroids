@@ -1,0 +1,17 @@
+canvas {
+  border: solid black 3px;
+  display: inline-block;
+}
+
+#game-data {
+  display: inline-block;
+  font-size: 34px;
+  color: purple;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+#paused {
+  display: none;
+  color: red;
+}

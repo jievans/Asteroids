@@ -19,6 +19,8 @@ Function.prototype.inherits = function(Parent){
     this.dimensions = {x: xDim, y: yDim};
     this.ship = new Ship(this);
     this.surviving = true;
+    this.score = 0;
+    this.$scoreCounter = $("#score");
 
     for( var i = 0; i < 10; i++) {
       this.asteroids.push(Asteroid.randomAsteroid(this));
@@ -60,6 +62,8 @@ Function.prototype.inherits = function(Parent){
           that.asteroids.forEach(function(asteroid, astIndex) {
             if (bullet.isHit(asteroid)) {
                  delete that.asteroids[astIndex];
+                 that.score++;
+                 that.$scoreCounter.html(that.score);
                  that.asteroids[astIndex] = Asteroid.randomAsteroid(that);
                  delete that.bullets[index];
                }
@@ -90,10 +94,22 @@ Function.prototype.inherits = function(Parent){
         } else {
           console.log("You just got powned.");
           clearInterval(id);
+          
+          var restart = function(event){
+            console.log(event.keyCode);
+            if( event.keyCode == 82 ){
+              console.log("event registering");
+              newGame();
+              $("body").unbind("keydown", restart);
+            }      
+          };
+          
+          $("body").on("keydown", restart);
         }
       }, 30);
+      
+      return id;
     };
-
   };
 
   window.Game = Game;
@@ -118,7 +134,7 @@ Function.prototype.inherits = function(Parent){
   function Asteroid(game, position){
     MovingObject.call(this, position);
     this.game = game;
-    this.radius = 7;
+    this.radius = 10;
     this.velocity = {x: 1, y: 1};
     this.velCounter = 0;
 
@@ -142,7 +158,6 @@ Function.prototype.inherits = function(Parent){
 
         this.velCounter = 0;
       } else{
-        console.log(this.velCounter);
         this.velCounter++;
       }
     };
@@ -166,7 +181,7 @@ Function.prototype.inherits = function(Parent){
   function Ship(game){
     var that = this;
     this.game = game;
-    this.radius = 5;
+    this.radius = 10;
     this.position = {x: game.dimensions.x / 2, y: game.dimensions.y / 2};
     this.velocity = { x: 0, y: 0 };
 
@@ -184,7 +199,13 @@ Function.prototype.inherits = function(Parent){
     var context = this.game.context;
     context.fillStyle = "blue";
     var size = this.radius * 2;
-    context.fillRect(this.position.x, this.position.y, size, size);
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, this.radius, 0, 2*Math.PI);
+    context.closePath();
+    context.fill();
+    
+    context.arc(100, 100, 100, 0, 2*Math.PI);
+   // context.fillRect(this.position.x, this.position.y, size, size);
   };
 
   // Ship.prototype.update = function() {
@@ -193,17 +214,19 @@ Function.prototype.inherits = function(Parent){
 //   };
 
   Ship.prototype.power = function(dx, dy) {
-    this.velocity.x += dx * .5;
-    this.velocity.y += dy * .5;
+    this.velocity.x += dx;
+    this.velocity.y += dy;
   };
 
   Ship.prototype.isHit = function(){
     var that = this;
     var hit = false;
     this.game.asteroids.forEach(function(asteroid){
+      var asteroidMidX = asteroid.position.x + asteroid.radius;
+      var asteroidMidY = asteroid.position.y + asteroid.radius;
       var distance = Math.sqrt(
-        Math.pow(asteroid.position.x - that.position.x, 2)
-      + Math.pow(asteroid.position.y - that.position.y, 2)
+        Math.pow(asteroidMidX - that.position.x, 2)
+      + Math.pow(asteroidMidY - that.position.y, 2)
       );
       var sumRadii = asteroid.radius + that.radius;
       if( distance < sumRadii){
@@ -292,13 +315,39 @@ Function.prototype.inherits = function(Parent){
 
 })();
 
-
-
-window.onload = function(){
+$(function(){
   var canvas = document.getElementById('canvas');
   var context = canvas.getContext('2d');
-  var myGame = new Game(context, 800, 600);
+  var currentGame = new Game(context, 800, 600);
   console.log("hello");
-  console.log(myGame);
-  myGame.start();
-};
+  var intervalId = null;
+  var paused = false;
+  
+  $("body").on("keydown", function(event){
+    if( event.keyCode == 83 ){
+      intervalId = currentGame.start();
+      $("#start-message").hide();
+    }
+  });
+  
+  $("body").on("keydown", function(event){
+    if( event.keyCode == 80 ){
+      console.log(paused);
+      if (paused == true){
+        intervalId = currentGame.start();
+        $("#paused").hide();
+        paused = false;
+      } else if ( intervalId ) {
+        clearInterval(intervalId);
+        $("#paused").show();
+        paused = true;
+      }
+    }
+  });
+  
+  newGame = function(){
+    currentGame = new Game(context, 800, 600);
+    paused = false;
+    intervalId = currentGame.start();
+  };
+});

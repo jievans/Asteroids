@@ -1,8 +1,28 @@
 <html>
-<head></head>
+<head>
+  <link rel="stylesheet" type="text/css" href="asteroids.css" >
+</head>
 <script src="keymaster.min.js"></script>
+<script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="asteroids.js"></script>
+<script type="text/javascript" src="jquery.position.js"></script>
 <body>
   <canvas width="800" height="600" id="canvas"></canvas>
+  <div id="game-data">
+    <div id="start-message">hit "s" to start the game</div>
+    <div id="paused">Paused</div>
+    <div>hit "p" to pause the game</div>
+    <div>Score: <span id="score">0</span></div>
+  </div>
 </body>
+
+<script type="text/javascript">
+$(function(){
+  $("#start-message").position({
+    my: "center center",
+    at: "center center",
+    of: $("canvas"),
+  });
+});
+</script>
 </html>
